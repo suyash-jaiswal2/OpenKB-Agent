@@ -107,6 +107,7 @@ Create a `.env` file in the project root:
 ```
 OPENROUTER_API_KEY=your_key_here
 LLM_API_KEY=your_key_here
+GROQ_API_KEY=your_key_here
 ```
 ### 4. Initialise the knowledge base
 
