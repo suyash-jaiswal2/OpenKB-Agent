@@ -9,7 +9,6 @@ const MODELS = {
   groq: [
     { label: "Llama 3.3 70B", value: "llama-3.3-70b-versatile" },
     { label: "Llama 3.1 8B", value: "llama-3.1-8b-instant" },
-    { label: "Mixtral 8x7B", value: "mixtral-8x7b-32768" },
   ],
   openrouter: [
     { label: "Nemotron Super 120B", value: "nvidia/nemotron-3-super-120b-a12b:free" },
