@@ -451,3 +451,22 @@ body {
 .send-btn:hover { opacity: 0.88; }
 .send-btn:active { transform: scale(0.97); }
 .send-btn:disabled { opacity: 0.4; cursor: default; }
+
+.model-select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 44px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.model-select:focus {
+  border-color: var(--accent);
+  color: var(--text);
+}

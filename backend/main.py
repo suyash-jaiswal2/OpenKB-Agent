@@ -27,7 +27,6 @@ FALLBACK_MODELS = [
     "nvidia/nemotron-3-super-120b-a12b:free",
     "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
     "poolside/laguna-xs.2:free",
-    "microsoft/phi-4-reasoning:free",
 ]
 
 
@@ -109,11 +108,13 @@ async def add_document(file: UploadFile = File(...)):
 async def query(body: dict):
     question = body.get("question", "")
     context = get_wiki_context()
+    provider = body.get("provider", "groq")
+    model = body.get("model", "llama-3.3-70b-versatile")
 
     if not context:
         return {"answer": "No documents indexed yet. Please add some documents first."}
 
-    answer = call_llm([
+    messages = [
         {
             "role": "system",
             "content": f"You are a helpful assistant. Answer questions using only the following knowledge base:\n\n{context}"
@@ -122,6 +123,31 @@ async def query(body: dict):
             "role": "user",
             "content": question
         }
-    ])
+    ]
 
-    return {"answer": answer}
+    if provider == "groq":
+        response = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {os.getenv('GROQ_API_KEY')}",
+                "Content-Type": "application/json",
+            },
+            json={"model": model, "messages": messages}
+        )
+    else:
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={"model": model, "messages": messages}
+        )
+
+    data = response.json()
+    print(f"[{provider}/{model}]:", data.get("error", "OK"))
+
+    if "choices" not in data:
+        return {"answer": "Error: " + str(data.get("error", {}).get("message", data))}
+
+    return {"answer": data["choices"][0]["message"]["content"]}

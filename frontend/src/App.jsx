@@ -5,6 +5,21 @@ import "./App.css"
 
 const API = "http://localhost:8000"
 
+const MODELS = {
+  groq: [
+    { label: "Llama 3.3 70B", value: "llama-3.3-70b-versatile" },
+    { label: "Llama 3.1 8B", value: "llama-3.1-8b-instant" },
+    { label: "Mixtral 8x7B", value: "mixtral-8x7b-32768" },
+  ],
+  openrouter: [
+    { label: "Nemotron Super 120B", value: "nvidia/nemotron-3-super-120b-a12b:free" },
+    { label: "Nemotron Nano 30B", value: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free" },
+    { label: "Laguna XS.2", value: "poolside/laguna-xs.2:free" },
+  ]
+}
+
+
+
 function parseStatus(raw) {
   const nums = { sources: 0, summaries: 0, concepts: 0 }
   if (!raw) return nums
@@ -26,6 +41,8 @@ export default function App() {
   const [uploading, setUploading] = useState(false)
   const bottomRef = useRef(null)
   const fileInputRef = useRef(null)
+  const [provider, setProvider] = useState("groq")
+  const [model, setModel] = useState("llama-3.3-70b-versatile")
 
   const fetchStatus = () => {
     axios.get(`${API}/api/status`).then(res => {
@@ -45,7 +62,7 @@ export default function App() {
     setMessages(prev => [...prev, { role: "user", content: question }])
     setLoading(true)
     try {
-      const res = await axios.post(`${API}/api/query`, { question })
+      const res = await axios.post(`${API}/api/query`, { question, provider, model })
       setMessages(prev => [...prev, { role: "assistant", content: res.data.answer }])
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: "Could not reach the backend. Is uvicorn running?" }])
@@ -74,6 +91,8 @@ export default function App() {
       e.target.value = ""
     }
   }
+
+
 
   return (
     <div className="layout">
@@ -193,6 +212,28 @@ export default function App() {
         </div>
 
         <div className="input-bar">
+          <select
+            value={provider}
+            onChange={e => {
+              setProvider(e.target.value)
+              setModel(MODELS[e.target.value][0].value)
+            }}
+            className="model-select"
+          >
+            <option value="groq">Groq</option>
+            <option value="openrouter">OpenRouter</option>
+          </select>
+
+          <select
+            value={model}
+            onChange={e => setModel(e.target.value)}
+            className="model-select"
+          >
+            {MODELS[provider].map(m => (
+              <option key={m.value} value={m.value}>{m.label}</option>
+            ))}
+          </select>
+
           <input
             className="input-field"
             value={input}
@@ -205,7 +246,6 @@ export default function App() {
           </button>
         </div>
       </div>
-
     </div>
   )
 }
